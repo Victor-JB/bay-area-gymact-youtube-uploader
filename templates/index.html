@@ -7,6 +7,15 @@
 </head>
 <body>
     <h1>Hello, Flask on Vercel!</h1>
-    <button onclick="alert('Button Clicked!')">Click Me</button>
+    <button onclick="signIn()">Sign in with Google</button>
+    <script type="module">
+      import { signInWithGoogle } from "./firebase.js";
+
+      window.signIn = () => {
+        signInWithGoogle().then(() => {
+          console.log("Signed in successfully");
+        });
+      };
+    </script>
 </body>
 </html>
