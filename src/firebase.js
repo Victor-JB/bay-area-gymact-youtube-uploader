@@ -1,13 +1,12 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
 
-// Load environment variables (for local development)
+// Load environment variables
 if (typeof process !== "undefined") {
   require("dotenv").config();
 }
 
-// Firebase configuration using environment variables
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -20,11 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({
-  client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-});
 
 // Request Google Drive permissions
 provider.addScope("https://www.googleapis.com/auth/drive.file");
@@ -34,29 +29,10 @@ provider.addScope("https://www.googleapis.com/auth/drive.metadata.readonly");
 const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    console.log("User signed in:", user);
-
-    // Store user data in Firestore
-    await saveUserData(user);
-
-    return user;
+    console.log("User signed in:", result.user);
+    return result.user;
   } catch (error) {
     console.error("Error signing in:", error);
-  }
-};
-
-// Function to store user data in Firestore
-const saveUserData = async (user, folderId = null) => {
-  try {
-    await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      name: user.displayName,
-      folderId: folderId || null
-    });
-    console.log("User data saved.");
-  } catch (error) {
-    console.error("Error saving user data:", error);
   }
 };
 
@@ -67,10 +43,9 @@ const loadGooglePicker = () => {
   });
 };
 
-// Function to open the Google Drive Picker
+// Function to open Google Drive Picker
 const openGoogleDrivePicker = async () => {
   try {
-    // Ensure gapi is loaded
     await loadGooglePicker();
 
     const oauthToken = gapi.auth.getToken().access_token;
@@ -78,16 +53,14 @@ const openGoogleDrivePicker = async () => {
     const picker = new google.picker.PickerBuilder()
       .addView(google.picker.ViewId.FOLDERS)
       .setOAuthToken(oauthToken)
-      .setDeveloperKey(process.env.GOOGLE_API_KEY) // Ensure this is set in env variables
+      .setDeveloperKey(process.env.REACT_APP_GOOGLE_API_KEY) // Set your API key
       .setCallback(async (data) => {
         if (data.action === google.picker.Action.PICKED) {
           const folderId = data.docs[0].id;
           console.log("Selected Folder ID:", folderId);
 
-          const user = auth.currentUser;
-          if (user) {
-            await saveUserData(user, folderId);
-          }
+          // Fetch files in the selected folder
+          fetchDriveFiles(folderId, oauthToken);
         }
       })
       .build();
@@ -98,5 +71,23 @@ const openGoogleDrivePicker = async () => {
   }
 };
 
-// Export functions
+// Function to fetch files from a selected Google Drive folder
+const fetchDriveFiles = async (folderId, accessToken) => {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${process.env.REACT_APP_GOOGLE_API_KEY}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+    console.log("Files in selected folder:", data.files);
+  } catch (error) {
+    console.error("Error fetching files:", error);
+  }
+};
+
 export { auth, signInWithGoogle, openGoogleDrivePicker };

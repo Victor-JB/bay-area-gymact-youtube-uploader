@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Flask App</title>
+    <title>Google Drive Picker</title>
+    <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 <body>
-    <h1>Hello, Flask on Vercel!</h1>
-    <button onclick="signIn()">Sign in with Google</button>
-    <script type="module">
-      import { signInWithGoogle } from "./firebase.js";
+    <h1>Google Drive Folder Picker</h1>
 
-      window.signIn = async () => {
-        await signInWithGoogle();
-      };
-    </script>
-    <button onclick="pickFolder()">Pick a Google Drive Folder</button>
-    <script type="module">
-      import { openGoogleDrivePicker } from "./firebase.js";
+    <button id="signInButton">Sign in with Google</button>
+    <button id="pickFolderButton">Pick a Google Drive Folder</button>
 
-      window.pickFolder = async () => {
-        await openGoogleDrivePicker();
-      };
-    </script>
+    <!-- Load JavaScript from Flask static folder -->
 </body>
 </html>
