@@ -11,10 +11,16 @@
     <script type="module">
       import { signInWithGoogle } from "./firebase.js";
 
-      window.signIn = () => {
-        signInWithGoogle().then(() => {
-          console.log("Signed in successfully");
-        });
+      window.signIn = async () => {
+        await signInWithGoogle();
+      };
+    </script>
+    <button onclick="pickFolder()">Pick a Google Drive Folder</button>
+    <script type="module">
+      import { openGoogleDrivePicker } from "./firebase.js";
+
+      window.pickFolder = async () => {
+        await openGoogleDrivePicker();
       };
     </script>
 </body>
