@@ -11,7 +11,20 @@
     <button id="signInButton">Sign in with Google</button>
     <button id="pickFolderButton">Pick a Google Drive Folder</button>
 
-    <!-- Load JavaScript from Flask's static folder -->
+    <!-- Inject environment variables from Flask -->
+    <script>
+        window.env = {
+            FIREBASE_API_KEY: "{{ firebase_api_key }}",
+            FIREBASE_AUTH_DOMAIN: "{{ firebase_auth_domain }}",
+            FIREBASE_PROJECT_ID: "{{ firebase_project_id }}",
+            FIREBASE_STORAGE_BUCKET: "{{ firebase_storage_bucket }}",
+            FIREBASE_MESSAGING_SENDER_ID: "{{ firebase_messaging_sender_id }}",
+            FIREBASE_APP_ID: "{{ firebase_app_id }}",
+            GOOGLE_API_KEY: "{{ google_api_key }}"
+        };
+    </script>
+
+    <!-- Load JavaScript -->
     <script type="module" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
