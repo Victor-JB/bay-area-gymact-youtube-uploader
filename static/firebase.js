@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 // Load environment variables
 if (typeof process !== "undefined") {
@@ -18,7 +18,6 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-console.log("App here", app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
@@ -27,7 +26,7 @@ provider.addScope("https://www.googleapis.com/auth/drive.file");
 provider.addScope("https://www.googleapis.com/auth/drive.metadata.readonly");
 
 // Function to sign in with Google
-const signInWithGoogle = async () => {
+export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     console.log("User signed in:", result.user);
@@ -37,7 +36,7 @@ const signInWithGoogle = async () => {
   }
 };
 
-// Load Google Picker API
+// Function to load Google Picker
 const loadGooglePicker = () => {
   return new Promise((resolve, reject) => {
     gapi.load("picker", { callback: resolve, onerror: reject });
@@ -45,7 +44,7 @@ const loadGooglePicker = () => {
 };
 
 // Function to open Google Drive Picker
-const openGoogleDrivePicker = async () => {
+export const openGoogleDrivePicker = async () => {
   try {
     await loadGooglePicker();
 
@@ -90,5 +89,3 @@ const fetchDriveFiles = async (folderId, accessToken) => {
     console.error("Error fetching files:", error);
   }
 };
-
-export { auth, signInWithGoogle, openGoogleDrivePicker };
