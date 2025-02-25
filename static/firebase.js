@@ -41,46 +41,47 @@ const loadGooglePicker = () => {
 // Function to open Google Drive Picker
 export const openGoogleDrivePicker = async () => {
   try {
-    await loadGooglePicker();
-
     const oauthToken = gapi.auth.getToken().access_token;
 
     const picker = new google.picker.PickerBuilder()
       .addView(google.picker.ViewId.FOLDERS)
       .setOAuthToken(oauthToken)
-      .setDeveloperKey(window.env.GOOGLE_API_KEY) // Set your API key
+      .setDeveloperKey(window.env.GOOGLE_API_KEY)
       .setCallback(async (data) => {
         if (data.action === google.picker.Action.PICKED) {
           const folderId = data.docs[0].id;
           console.log("Selected Folder ID:", folderId);
 
-          // Fetch files in the selected folder
-          fetchDriveFiles(folderId, oauthToken);
+          // Fetch videos from folder
+          fetchDriveVideos(folderId, oauthToken);
         }
       })
       .build();
 
     picker.setVisible(true);
   } catch (error) {
-    console.error("Error loading Google Picker:", error);
+    console.error("Error opening Google Picker:", error);
   }
 };
 
 // Function to fetch files from a selected Google Drive folder
-const fetchDriveFiles = async (folderId, accessToken) => {
+const fetchDriveVideos = async (folderId, accessToken) => {
   try {
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents&key=${window.env.GOOGLE_API_KEY}`,
+      `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents and mimeType='video/mp4'&fields=files(id,name,mimeType)`,
       {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       }
     );
 
     const data = await response.json();
-    console.log("Files in selected folder:", data.files);
+    console.log("Videos found:", data.files);
+
+    // Upload each video to YouTube
+    for (const video of data.files) {
+      await uploadToYouTube(video.id, video.name, accessToken);
+    }
   } catch (error) {
-    console.error("Error fetching files:", error);
+    console.error("Error fetching videos:", error);
   }
 };
